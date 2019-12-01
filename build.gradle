@@ -26,6 +26,7 @@ test {
 
 jacoco {
     toolVersion = "0.8.4"
+    reportsDir = file("$buildDir/reports/coverage")
 }
 
 jacocoTestReport {
@@ -34,6 +35,10 @@ jacocoTestReport {
         csv.enabled false
         html.enabled true
     }
+}
+
+coveralls {
+    jacocoReportPath "${jacoco.reportsDir}/test/jacocoTestReport.xml"
 }
 
 dependencies {

@@ -1,4 +1,4 @@
-# AdventOfCode2019 ![Build Status](https://travis-ci.com/delr3ves/AdventOfCode2019.svg?branch=master) ![Coverage Report](https://coveralls.io/repos/github/delr3ves/AdventOfCode2019/badge.svg?branch=master)
+# AdventOfCode2019 ![Build Status](https://travis-ci.com/delr3ves/AdventOfCode2019.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/delr3ves/AdventOfCode2019/badge.svg?branch=master)](https://coveralls.io/github/delr3ves/AdventOfCode2019?branch=master)
 
 The code for Advent Of Code 2019 (https://adventofcode.com/)
 
