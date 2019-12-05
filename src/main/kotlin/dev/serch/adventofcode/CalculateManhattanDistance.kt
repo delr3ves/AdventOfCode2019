@@ -12,6 +12,20 @@ class CalculateManhattanDistance {
         return manhattanDistances.min() ?: 0
     }
 
+    fun takingTimeIntoAccount(wire1: List<String>, wire2: List<String>): Int {
+        val pathWire1 = calculatePath(wire1)
+        val pathWire2 = calculatePath(wire2)
+        val crossPoints = pathWire1.intersect(pathWire2)
+        val distancesToIntersections = crossPoints.map {
+            calculateStepsToAchievePosition(pathWire1, it) + calculateStepsToAchievePosition(pathWire2, it)
+        }
+        return distancesToIntersections.min() ?: 0
+    }
+
+    private fun calculateStepsToAchievePosition(pathWire: List<Point>, point: Point): Int {
+        return pathWire.indexOf(point) + 1
+    }
+
     private fun calculatePath(wire: List<String>): List<Point> {
         val centralPoint = Point(0, 0)
         return wire.fold(emptyList()) { acc, currentMovement ->
