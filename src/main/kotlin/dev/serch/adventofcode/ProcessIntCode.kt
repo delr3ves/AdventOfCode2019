@@ -3,14 +3,19 @@ package dev.serch.adventofcode
 import dev.serch.adventofcode.ProcessIntCode.Companion.replace
 
 data class ExecutionResult(val program: List<Int>, val output: Int?)
+data class PartialResult(val result: ExecutionResult, val continueProcessing: Boolean, val nextPointer: Int, val nextInput: List<Int>)
 
 class ProcessIntCode {
 
     operator fun invoke(intCode: List<Int>, input: Int = 0): ExecutionResult {
+        return this(intCode, listOf(input))
+    }
+
+    operator fun invoke(intCode: List<Int>, input: List<Int>): ExecutionResult {
         return process(ExecutionResult(intCode, null), 0, input)
     }
 
-    private tailrec fun process(currentExecution: ExecutionResult, instructionPointer: Int, input: Int): ExecutionResult {
+    private tailrec fun process(currentExecution: ExecutionResult, instructionPointer: Int, input: List<Int>): ExecutionResult {
         val intCode = currentExecution.program
         val instruction = intCode[instructionPointer]
         val opCode = instruction % 100
@@ -19,31 +24,31 @@ class ProcessIntCode {
 
         val processed = when (opCode) {
             SUM_CODE ->
-                Triple(sum(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4)
+                PartialResult(sum(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4, input)
             MULTIPLY_CODE ->
-                Triple(multiply(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4)
+                PartialResult(multiply(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4, input)
             INPUT_CODE ->
-                Triple(copyInput(currentExecution, instructionPointer + 1, input), true, instructionPointer + 2)
+                PartialResult(copyInput(currentExecution, instructionPointer + 1, input.first()), true, instructionPointer + 2, input.drop(1) + listOf(input.first()))
             OUTPUT_CODE ->
-                Triple(copyOutput(intCode, instructionPointer + 1, op1Mode), true, instructionPointer + 2)
+                PartialResult(copyOutput(intCode, instructionPointer + 1, op1Mode), true, instructionPointer + 2, input)
             JUMP_IF_TRUE_CODE ->
-                Triple(currentExecution, true, jumpIfTrue(intCode, instructionPointer + 1, op1Mode, op2Mode))
+                PartialResult(currentExecution, true, jumpIfTrue(intCode, instructionPointer + 1, op1Mode, op2Mode), input)
             JUMP_IF_FALSE_CODE ->
-                Triple(currentExecution, true, jumpIfFalse(intCode, instructionPointer + 1, op1Mode, op2Mode))
+                PartialResult(currentExecution, true, jumpIfFalse(intCode, instructionPointer + 1, op1Mode, op2Mode), input)
             LESS_THAN_CODE ->
-                Triple(lessThan(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4)
+                PartialResult(lessThan(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4, input)
             EQUALS_CODE ->
-                Triple(equal(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4)
+                PartialResult(equal(currentExecution, instructionPointer + 1, op1Mode, op2Mode), true, instructionPointer + 4, input)
             STOP_CODE ->
-                Triple(currentExecution, false, instructionPointer)
+                PartialResult(currentExecution, false, instructionPointer, input)
             else ->
-                Triple(currentExecution, false, instructionPointer)
+                PartialResult(currentExecution, false, instructionPointer, input)
         }
 
-        return if (!processed.second || processed.third >= intCode.size) {
-            processed.first
+        return if (!processed.continueProcessing || processed.nextPointer >= intCode.size) {
+            processed.result
         } else {
-            process(processed.first, processed.third, input)
+            process(processed.result, processed.nextPointer, processed.nextInput)
         }
     }
 
